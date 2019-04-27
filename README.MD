@@ -1,6 +1,6 @@
 # System design analysis project
 
-Thành viên
+Members
 * **1512445**	Trần Cao Việt
 * **1612105**	Hồ Thị Điệp
 * **1612131**	Võ Thị Thùy Dương

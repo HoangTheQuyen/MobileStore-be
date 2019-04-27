@@ -16,6 +16,6 @@ http://localhost:3000
 ## Database
 * connection: mongodb://localhost:27017/mobilestore
 
-## Project Request
+## Project Requests
 https://drive.google.com/drive/folders/1uU5jyI7we0vsr4aXhEIhL2ZpCXpL8_qF
 

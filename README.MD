@@ -7,8 +7,8 @@ Members
 * **1612155**   Đỗ Ngân Giang
 * **1512291**   Trần Anh Linh 
 ## instructions to run the project
-* add ssh and pull code from branch dev
-* npm install
+* Add your computer's ssh key(public) to your github account and pull code from branch dev.
+* pm install
 * npm start on port 3000
 ## Host
 http://localhost:3000

@@ -20,7 +20,10 @@ const ProductSchema = new mongoose.Schema({
         type: mongoose.Schema.ObjectId,
         ref:'Origin'
     },
-    isCellPhone: Boolean,
+    isCellPhone: {
+        type: Boolean,
+        required: 'isCellPhone is required'
+    },
     attribute: {
         type: mongoose.Schema.ObjectId,
         ref:'Attribute'
@@ -29,15 +32,27 @@ const ProductSchema = new mongoose.Schema({
         type: Date,
         required: "warrantyPeriod price is required"
     },
+    category:{
+        type: mongoose.Types.ObjectId,
+        ref: 'Category'
+    },
     description:{
         type: String,
         trim: true,
         required: 'description is required'
     },
+    images:[{
+        type: String
+    }],
+    quantity:{
+        type: Number,
+        required: 'Quantity product is required'
+    },
     created: {
         type: Date,
         default: Date.now
     },
+   
     updated: Date,
     isDelete:{
         type: Boolean,

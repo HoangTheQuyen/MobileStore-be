@@ -37,6 +37,10 @@ const UserSchema = new mongoose.Schema({
         enum: ['TYPEUSER1','TYPEUSER2', 'ADMIN'],
         default: 'TYPEUSER1'
     },
+    point:{
+        type: Number,
+        default: 0
+    },
     isDelete:{
         type: Boolean,
         default: false

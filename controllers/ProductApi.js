@@ -1,6 +1,6 @@
 const _ResponseBuilder = require("../config/enum");
 const _Product = require("../models/product");
-const _Attribute = require('../models/attribute')
+const _Attribute = require("../models/attribute");
 
 module.exports = {
   getAll: (req, res, next) => {
@@ -48,6 +48,8 @@ module.exports = {
 
     _Product
       .find()
+      .limit(limit)
+      .skip(offset)
       .then(products => {
         if (!products) {
           return res.status(401).json({
@@ -69,7 +71,7 @@ module.exports = {
             productName: product.name,
             price: product.price,
             quantity: product.quantity,
-            images: product.images
+            image: product.images[0]
           }))
         });
       })
@@ -85,37 +87,25 @@ module.exports = {
 
   getOne: (req, res) => {
     const productId = req.body.productId;
-    const shopId = req.body.shopId;
 
-    if (!productId || !shopId) {
-      return res.status(401).json({
-        status: {
-          returnCode: _ResponseBuilder.RETURN_CODE.FAILURE,
-          message: "productId or shopId are required"
-        }
-      });
-    }
-
-    if (
-      (productId && typeof productId !== "string") ||
-      (shopId && typeof shopId !== "string")
-    ) {
+    if (productId && typeof productId !== "string") {
       return res.status(401).json({
         STATUS: {
           returnCode: _ResponseBuilder.RETURN_CODE.FAILURE,
-          message: "productId or shopId are a objectId"
+          message: "productId is a objectId"
         }
       });
     }
 
     _Product
       .findOne({
-        shop: shopId,
         _id: productId
       })
-      .populate('shop')
-      .populate('Category')
-      .populate('Supplier')
+      .populate("attribute")
+      .populate("Origin")
+      .populate("Supplier")
+      .populate("Category")
+     
       .then(product => {
         if (!product) {
           return res.status(401).json({
@@ -133,33 +123,25 @@ module.exports = {
           },
           product: {
             productId: product._id,
-            shop:{
-              shopId: product.shop._id,
-              shopName: product.shop.name
-            },
-            category:{
-              // cateogryId: product.Category._id,
-              // categoryName: product.Category.name
-            },
-            supplier:{
+            supplier: {
               // supplierId: product.supplier._id,
               // supplierName: product.supplier.name
+            },
+            origin: {},
+            category: {}, 
+            attribute: {
+              productSize: product.attribute.size,
+              productWeight: product.attribute.weight,
+              productOs: product.attribute.os
             },
             productName: product.name,
             price: product.price,
             quantity: product.quantity,
             images: product.images,
+            isCellPhone: product.isCellPhone,
             description: product.description,
-            packageInfo: {
-              packageHeight: product.packageInfo.packageHeight,
-              packageLength: product.packageInfo.packageLength,
-              packageWidth: product.packageInfo.packageWidth,
-              packageWeight: product.packageInfo.packageWeight,
-              packageContent: product.packageInfo.packageContent
-            },
             createdAt: product.created,
-            updatedAt: product.updated,
-            isDeleted: product.isDelete
+            updatedAt: product.updated
           }
         });
       })
@@ -192,7 +174,7 @@ module.exports = {
       !isCellPhone ||
       !warrantyPeriod ||
       !description ||
-      !quantity 
+      !quantity
     ) {
       res.status(200).json({
         STATUS: {
@@ -241,55 +223,70 @@ module.exports = {
         } else {
         }
 
-        const product = new _Product({
-          name: name,
-          price: price,
-          supplier: supplierId,
-          origin: originId,
-          isCellPhone: isCellPhone,
-          Category: CategoryId,
-          attribute: new _Attribute({
-            size:{
-                sizeLong: attribute.size.sizeLong,
-                sizeWide: attribute.size.sizeWide,
-                sizeHigh: attribute.size.sizeHigh
-            },
-            weight: attribute.weight,
-            os: attribute.os
-          }),
-          warrantyPeriod: warrantyPeriod,
-          description: description,
-          images: images,
-          quantity: quantity
+        const newAttribute = new _Attribute({
+          size: {
+            sizeLong: attribute.size.sizeLong,
+            sizeWide: attribute.size.sizeWide,
+            sizeHigh: attribute.size.sizeHigh
+          },
+          weight: attribute.weight,
+          os: attribute.os
         });
 
-        product
+        newAttribute
           .save()
-          .then(product => {
-            if (!product) {
-              return res.status(401).json({
+          .then(attribute => {
+            if (!attribute) {
+              return res.status(200).json({
                 STATUS: {
                   returnCode: _ResponseBuilder.RETURN_CODE.FAILURE,
-                  message: "Create product don't success"
+                  message: "Save attribute fail."
                 }
               });
+            } else {
+              const product = new _Product({
+                name: name,
+                price: price,
+                supplier: supplierId,
+                origin: originId,
+                isCellPhone: isCellPhone,
+                Category: CategoryId,
+                attribute: newAttribute,
+                warrantyPeriod: warrantyPeriod,
+                description: description,
+                images: images,
+                quantity: quantity
+              });
+              product
+                .save()
+                .then(product => {
+                  if (!product) {
+                    return res.status(401).json({
+                      STATUS: {
+                        returnCode: _ResponseBuilder.RETURN_CODE.FAILURE,
+                        message: "Create product don't success"
+                      }
+                    });
+                  }
+                  res.status(200).json({
+                    STATUS: {
+                      returnCode: _ResponseBuilder.RETURN_CODE.SUCCESS,
+                      message: "Created product successfully"
+                    },
+                    productId: product._id
+                  });
+                })
+                .catch(err => {
+                  res.status(200).json({
+                    STATUS: {
+                      returnCode: _ResponseBuilder.RETURN_CODE.FAILURE,
+                      message: err + ""
+                    }
+                  });
+                });
             }
-            res.status(200).json({
-              STATUS: {
-                returnCode: _ResponseBuilder.RETURN_CODE.SUCCESS,
-                message: "Created product successfully"
-              },
-              productId: product._id
-            });
           })
-          .catch(err => {
-            res.status(200).json({
-              STATUS: {
-                returnCode: _ResponseBuilder.RETURN_CODE.FAILURE,
-                message: err + ""
-              }
-            });
-          });
+          .catch();
       })
       .catch(err => {
         res.status(200).json({

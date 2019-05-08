@@ -28,6 +28,10 @@ const AttributeSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    product:{
+        type: mongoose.Schema.ObjectId,
+        ref:'Product'
+    },
     updated: Date,
     isDelete:{
         type: Boolean,

@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const MongoConfig = require("./config/mongoConfig");
 const _DefaultRoutes = require("./config/defaultRoutes");
 const _Routes = require("./routes/index");
+const cors = require('cors')
 const router = require('express').Router()
 
 
@@ -17,6 +18,7 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static(__dirname + "/public"));
+app.use(cors())
 
 // Main APIs
 app.use(_DefaultRoutes.BASE_URL, _Routes);
